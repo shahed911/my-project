@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تعلم الحروف الهجائية 🔤</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-container {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #f5576c;
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+        .instruction {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .letter-display {
+            font-size: 120px;
+            color: #f5576c;
+            margin: 30px 0;
+            font-weight: bold;
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .word-image {
+            font-size: 80px;
+            margin: 20px 0;
+        }
+        .choices {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin: 30px 0;
+        }
+        .choice-btn {
+            padding: 25px;
+            font-size: 48px;
+            border: 3px solid #f5576c;
+            background: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        .choice-btn:hover {
+            background: #f5576c;
+            color: white;
+            transform: scale(1.1);
+        }
+        .choice-btn.correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+            animation: pulse 0.5s;
+        }
+        .choice-btn.wrong {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+            animation: shake 0.5s;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .score {
+            font-size: 28px;
+            color: #f5576c;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .message {
+            font-size: 28px;
+            margin: 20px 0;
+            min-height: 40px;
+            font-weight: bold;
+        }
+        .audio-btn {
+            padding: 15px 30px;
+            font-size: 24px;
+            background: #4facfe;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        .audio-btn:hover {
+            background: #00f2fe;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🔤 تعلم الحروف الهجائية</h1>
+        <div class="instruction">اختر الحرف الصحيح</div>
+        
+        <div class="letter-display" id="letter"></div>
+        <div class="word-image" id="wordImage"></div>
+        <button class="audio-btn" onclick="playSound()">🔊 استمع للحرف</button>
+        
+        <div class="message" id="message"></div>
+        
+        <div class="choices" id="choices"></div>
+        
+        <div class="score">
+            النتيجة: <span id="score">0</span> ⭐
+        </div>
+    </div>
+
+    <script>
+        let score = 0;
+        let currentLetter = '';
+        
+        const letters = [
+            { letter: 'ا', word: 'أسد', emoji: '🦁', sound: 'alif' },
+            { letter: 'ب', word: 'بطة', emoji: '🦆', sound: 'baa' },
+            { letter: 'ت', word: 'تفاحة', emoji: '🍎', sound: 'taa' },
+            { letter: 'ث', word: 'ثعلب', emoji: '🦊', sound: 'thaa' },
+            { letter: 'ج', word: 'جمل', emoji: '🐪', sound: 'jeem' },
+            { letter: 'ح', word: 'حصان', emoji: '🐴', sound: 'haa' },
+            { letter: 'خ', word: 'خروف', emoji: '🐑', sound: 'khaa' },
+            { letter: 'د', word: 'دجاجة', emoji: '🐔', sound: 'daal' },
+            { letter: 'ذ', word: 'ذئب', emoji: '🐺', sound: 'thaal' },
+            { letter: 'ر', word: 'رمان', emoji: '🍎', sound: 'raa' },
+            { letter: 'ز', word: 'زرافة', emoji: '🦒', sound: 'zaay' },
+            { letter: 'س', word: 'سمكة', emoji: '🐟', sound: 'seen' },
+            { letter: 'ش', word: 'شجرة', emoji: '🌳', sound: 'sheen' },
+            { letter: 'ص', word: 'صقر', emoji: '🦅', sound: 'saad' },
+            { letter: 'ض', word: 'ضفدع', emoji: '🐸', sound: 'daad' },
+            { letter: 'ط', word: 'طاووس', emoji: '🦚', sound: 'taa2' },
+            { letter: 'ظ', word: 'ظبي', emoji: '🦌', sound: 'thaa2' },
+            { letter: 'ع', word: 'عصفور', emoji: '🐦', sound: 'ayn' },
+            { letter: 'غ', word: 'غزال', emoji: '🦌', sound: 'ghayn' },
+            { letter: 'ف', word: 'فيل', emoji: '🐘', sound: 'faa' },
+            { letter: 'ق', word: 'قطة', emoji: '🐱', sound: 'qaaf' },
+            { letter: 'ك', word: 'كلب', emoji: '🐕', sound: 'kaaf' },
+            { letter: 'ل', word: 'ليمون', emoji: '🍋', sound: 'laam' },
+            { letter: 'م', word: 'موز', emoji: '🍌', sound: 'meem' },
+            { letter: 'ن', word: 'نحلة', emoji: '🐝', sound: 'noon' },
+            { letter: 'ه', word: 'هدهد', emoji: '🦜', sound: 'haa2' },
+            { letter: 'و', word: 'وردة', emoji: '🌹', sound: 'waaw' },
+            { letter: 'ي', word: 'يد', emoji: '✋', sound: 'yaa' }
+        ];
+
+        function generateQuestion() {
+            const randomIndex = Math.floor(Math.random() * letters.length);
+            const currentQuestion = letters[randomIndex];
+            currentLetter = currentQuestion.letter;
+            
+            document.getElementById('letter').textContent = '';
+            document.getElementById('wordImage').textContent = currentQuestion.emoji;
+            document.getElementById('message').textContent = '';
+            
+            // إنشاء خيارات
+            const choices = [currentQuestion];
+            while (choices.length < 4) {
+                const randomChoice = letters[Math.floor(Math.random() * letters.length)];
+                if (!choices.includes(randomChoice)) {
+                    choices.push(randomChoice);
+                }
+            }
+            
+            choices.sort(() => Math.random() - 0.5);
+            
+            const choicesContainer = document.getElementById('choices');
+            choicesContainer.innerHTML = '';
+            
+            choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = choice.letter;
+                btn.onclick = () => checkAnswer(choice.letter, btn);
+                choicesContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected, btn) {
+            const buttons = document.querySelectorAll('.choice-btn');
+            buttons.forEach(b => b.disabled = true);
+
+            if (selected === currentLetter) {
+                btn.classList.add('correct');
+                score++;
+                document.getElementById('score').textContent = score;
+                document.getElementById('message').textContent = '🎉 ممتاز! إجابة صحيحة!';
+                document.getElementById('letter').textContent = currentLetter;
+                
+                setTimeout(() => {
+                    generateQuestion();
+                }, 2000);
+            } else {
+                btn.classList.add('wrong');
+                document.getElementById('message').textContent = '❌ حاول مرة أخرى!';
+                document.getElementById('letter').textContent = currentLetter;
+                
+                buttons.forEach(b => {
+                    if (b.textContent === currentLetter) {
+                        b.classList.add('correct');
+                    }
+                });
+                
+                setTimeout(() => {
+                    generateQuestion();
+                }, 3000);
+            }
+        }
+
+        function playSound() {
+            // في التطبيق الحقيقي، سيتم تشغيل صوت الحرف
+            const msg = new SpeechSynthesisUtterance(currentLetter);
+            msg.lang = 'ar-SA';
+            msg.rate = 0.5;
+            window.speechSynthesis.speak(msg);
+        }
+
+        generateQuestion();
+    </script>
+</body>
+</html>
